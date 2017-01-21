@@ -1,5 +1,5 @@
 
-###############initial parameters###################################
+###############INITIAL PARAMETERS#################################
 N=10
 M=10
 alpha=c(0.2,0.4,0.6) 
@@ -7,14 +7,11 @@ mean_a=100
 sd_a=c(20,10,5)
 mean_b=c(200,100,50)
 sd_b=c(40,20,10)
-##############truncated level equal to 1-3sigma#############
+##############TRUNCATED LEVEL EQUAL TO 1-3 SIGMAS#################
 truncated_level_b<-vector(mode="numeric",length=0)
 truncated_level_a<-vector(mode="numeric",length=0)
-
-###############initial parameters end##############################
-
-###############loop###############################################
-
+###############INITIAL PARAMETERS END##############################
+###############LOOP BEGIN##########################################
 m_times_mes_mean<-vector(mode="numeric",length=0)
 m_times_mes_sd<-vector(mode="numeric",length=0)
 m_times_sds_mean<-vector(mode="numeric",length=0)
@@ -75,40 +72,26 @@ for (k in 1:length(alpha)){
               for (s in 1:length(x_a)){
                 if (x_a[s]>truncated_level_a[p]){
                   truncated_x_a[s] = truncated_level_a[p]
-                  r_a = r_a+1
-                  
+                  r_a = r_a+1                
                 }
                 
                 else{
                   truncated_x_a[s] = x_a[s]
-                }
-                
+                }              
               }
               for (t in 1:length(x_b)){
                 x_b[t] = x_b[t]+alpha[k]*x_a[t]
               }
               for (u in 1:length(x_b)){
                 if (x_b[u]>truncated_level_b[q]){
-                  #cc=paste("x_b",x_b[u],length(x_b)) 
-                  #print (cc)
-                  #dd=paste("truncated_level_b<x_b",truncated_level_b[q])
-                  #print (dd)
                   truncated_x_b[u] = truncated_level_b[q]
-                  r_b = r_b+1
-                  #ee=paste("r_b",r_bn)
-                  #print(ee)
-                  
+                  r_b = r_b+1      
                 }
                 else{
                   truncated_x_b[u] = x_b[u]
                   truncated_part_of_x_b <- c(truncated_part_of_x_b,x_b[u])
-                  #cc=paste("x_b",x_b[u]) 
-                  #print (cc)
-                  #dd=paste("truncated_level_b>x_b",truncated_level_b[q])
-                  #print (dd)
                 }
-              }
-              
+              }             
               ###########origin mean and sd##############
               mean_orig_b=mean_orig_b+mean(truncated_x_b)
               
@@ -117,29 +100,19 @@ for (k in 1:length(alpha)){
               }
               else{
                 sd_orig_b=var(truncated_x_b)
-              }
-              
-              
+              }             
               ###########apply the estimators function#####
               if (r_a!=0&&r_b!=0&&r_a!=N&&r_b!=N&&length(truncated_part_of_x_b)>2){
                 results=simplifiedf(truncated_part_of_x_b,r_b,alpha[k],mean_a,sd_a[l])
                 xes=results$xes# mean from new estimator
-                #print(xes)
                 sdes=results$sdes# sd from new estimator
-                #mes<-c(mes,xes)# mean vactor set from new estimator
                 mes=mes+xes
                 mes_count = mes_count+1
                 filtered_set <-c(filtered_set,xes)
-                sds<-c(sds,sqrt(sdes))# sd vector set from new estimator
-                
-              }
-              
-              
-              
+                sds<-c(sds,sqrt(sdes))# sd vector set from new estimator              
+              }    
             }##############end of exp times#####################
             ############## m_times_mes&sds_mean&sd ###############
-            #print(mes)
-            #print(sds)
             if (mes!==0&&mes_count!==0&&sdes!==0){
               mes_mean=mes/mes_count
               for (v in 1:mes_count){
@@ -177,8 +150,8 @@ for (k in 1:length(alpha)){
   }##############end of sd_a#####################
   
 }
-###############loop end###################################
-####################write to file##########################
+###############LOOP END##################################
+####################WRITE TO FILE##########################
 
 result_out<-cbind(n_vec_set,mean_vec_set_x_a,target_mean,mean_vec_set_x_b,sd_vec_set_x_b,
                   target_sd,truncate_level_set_x_a,truncate_level_set_x_b,alpha_vec_set,
@@ -196,36 +169,16 @@ simplifiedf=function(truncated_part_of_x_b,r,alpha,mean_a,sd_a){
   mi=dnorm(z,0,1)
   xmean=mean(truncated_part_of_x_b)
   xvar=0
-  #if(length(truncated_part_of_x_b)==1){
-  #  xvar<-0
-  #}
-  #else{
-  xvar=var(truncated_part_of_x_b)
-  #}
-  
+  xvar=var(truncated_part_of_x_b) 
   vares=p^2*xvar/(p^2-p*z*mi-mi^2)-alpha^2*sd_a^2
-  #print(paste('truncated_part_of_x_b',truncated_part_of_x_b))
   xes=xmean+(vares+alpha*sd_a^2)^0.5*mi/p-alpha*mean_a
-  #print(xmean-alpha*mean_a)
-  #sdes= sqrt(vares)
-  #print(xmean)
-  #print(xmean+(vares+alpha*sd_a^2)^0.5*mi/p)
-  #print ((vares+alpha*sd_a^2)^0.5*mi/p)
-  #print (xes)
-  #result<-list()
-  #if (!is.na(xes)&&!is.na(sdes)){
-  #print (xes)
-  #print (vares)
   if (vares< 0 | vares == 0){
     sdes = 0
   }
   else{
     sdes = sqrt(vares)
   }
-  print (sdes)
   result <- list(xes=xes, sdes=sdes)  
   return(result) 
-  #return (xes)
 }
-
 ###################################FUNCTION END##########################
